@@ -33,9 +33,11 @@ logger = get_logger(__name__)
 try:
     nltk.data.find('tokenizers/punkt')
     nltk.data.find('corpora/stopwords')
+    nltk.data.find('tokenizers/punkt_tab')
 except LookupError:
     nltk.download('punkt')
     nltk.download('stopwords')
+    nltk.download('punkt_tab')
 
 
 class PostsAnalyzer:
