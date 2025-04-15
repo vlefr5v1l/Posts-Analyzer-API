@@ -32,13 +32,13 @@ logger = get_logger(__name__)
 
 # Download NLTK resources
 try:
-    nltk.data.find('tokenizers/punkt')
-    nltk.data.find('corpora/stopwords')
-    nltk.data.find('tokenizers/punkt_tab')
+    nltk.data.find("tokenizers/punkt")
+    nltk.data.find("corpora/stopwords")
+    nltk.data.find("tokenizers/punkt_tab")
 except LookupError:
-    nltk.download('punkt')
-    nltk.download('stopwords')
-    nltk.download('punkt_tab')
+    nltk.download("punkt")
+    nltk.download("stopwords")
+    nltk.download("punkt_tab")
 
 
 class PostsAnalyzer:
@@ -54,16 +54,16 @@ class PostsAnalyzer:
         """
         self.batch_size = batch_size or settings.BATCH_SIZE
         self.max_workers = max_workers or settings.MAX_WORKERS
-        self.russian_stopwords = set(stopwords.words('russian'))
-        self.english_stopwords = set(stopwords.words('english'))
+        self.russian_stopwords = set(stopwords.words("russian"))
+        self.english_stopwords = set(stopwords.words("english"))
         self.all_stopwords = self.russian_stopwords.union(self.english_stopwords)
 
     async def analyze_filtered_posts(
-            self,
-            db: AsyncSession,
-            filters: PostFilterParams,
-            analysis_types: List[str] = None,
-            save_results: bool = True,
+        self,
+        db: AsyncSession,
+        filters: PostFilterParams,
+        analysis_types: List[str] = None,
+        save_results: bool = True,
     ) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
         """
         Analyze posts based on filter criteria
@@ -97,7 +97,9 @@ class PostsAnalyzer:
             async with semaphore:
                 # Создаем новую сессию для каждой обработки
                 async with async_session_maker() as session:
-                    return await self._analyze_post(session, post, analysis_types, save_results)
+                    return await self._analyze_post(
+                        session, post, analysis_types, save_results
+                    )
 
         # Process posts concurrently with controlled concurrency
         tasks = [process_post(post) for post in posts]
@@ -106,11 +108,11 @@ class PostsAnalyzer:
         return results, metadata
 
     async def _analyze_post(
-            self,
-            db: AsyncSession,
-            post: Post,
-            analysis_types: List[str],
-            save_results: bool,
+        self,
+        db: AsyncSession,
+        post: Post,
+        analysis_types: List[str],
+        save_results: bool,
     ) -> Dict[str, Any]:
         """
         Analyze a single post with specified analysis types
@@ -164,11 +166,13 @@ class PostsAnalyzer:
             Dict containing word frequency analysis
         """
         # Clean and tokenize text
-        clean_text = re.sub(r'[^\w\s]', ' ', text.lower())
+        clean_text = re.sub(r"[^\w\s]", " ", text.lower())
         words = word_tokenize(clean_text)
 
         # Remove stopwords
-        filtered_words = [word for word in words if word.isalpha() and word not in self.all_stopwords]
+        filtered_words = [
+            word for word in words if word.isalpha() and word not in self.all_stopwords
+        ]
 
         # Count word frequencies
         word_counts = Counter(filtered_words)
@@ -213,7 +217,9 @@ class PostsAnalyzer:
         sentence_count = len(sentences)
 
         # Avoid division by zero
-        avg_word_length = sum(len(word) for word in words) / word_count if word_count > 0 else 0
+        avg_word_length = (
+            sum(len(word) for word in words) / word_count if word_count > 0 else 0
+        )
         avg_sentence_length = word_count / sentence_count if sentence_count > 0 else 0
 
         return {
@@ -235,11 +241,13 @@ class PostsAnalyzer:
             Dict containing extracted tags
         """
         # Clean and tokenize text
-        clean_text = re.sub(r'[^\w\s]', ' ', text.lower())
+        clean_text = re.sub(r"[^\w\s]", " ", text.lower())
         words = word_tokenize(clean_text)
 
         # Remove stopwords
-        filtered_words = [word for word in words if word.isalpha() and word not in self.all_stopwords]
+        filtered_words = [
+            word for word in words if word.isalpha() and word not in self.all_stopwords
+        ]
 
         # Count word frequencies
         word_counts = Counter(filtered_words)
@@ -248,7 +256,7 @@ class PostsAnalyzer:
         tags = [word for word, _ in word_counts.most_common(10)]
 
         # Also look for hashtags in original text
-        hashtags = re.findall(r'#(\w+)', text)
+        hashtags = re.findall(r"#(\w+)", text)
 
         return {
             "extracted_tags": tags,
@@ -256,10 +264,10 @@ class PostsAnalyzer:
         }
 
     async def get_post_analysis_result(
-            self,
-            db: AsyncSession,
-            post_id: int,
-            run_if_missing: bool = True,
+        self,
+        db: AsyncSession,
+        post_id: int,
+        run_if_missing: bool = True,
     ) -> Optional[PostAnalysisResult]:
         """
         Get combined analysis result for a post
@@ -277,12 +285,16 @@ class PostsAnalyzer:
             return None
 
         # Try to get existing analyses
-        word_freq_analysis = await get_latest_post_analysis(db, post_id, "word_frequency")
+        word_freq_analysis = await get_latest_post_analysis(
+            db, post_id, "word_frequency"
+        )
         text_stats_analysis = await get_latest_post_analysis(db, post_id, "text_stats")
         tags_analysis = await get_latest_post_analysis(db, post_id, "tags")
 
         # Check if we need to run analyses
-        if run_if_missing and (not word_freq_analysis or not text_stats_analysis or not tags_analysis):
+        if run_if_missing and (
+            not word_freq_analysis or not text_stats_analysis or not tags_analysis
+        ):
             analysis_types = []
             if not word_freq_analysis:
                 analysis_types.append("word_frequency")
@@ -296,9 +308,13 @@ class PostsAnalyzer:
 
             # Get updated analyses
             if not word_freq_analysis:
-                word_freq_analysis = await get_latest_post_analysis(db, post_id, "word_frequency")
+                word_freq_analysis = await get_latest_post_analysis(
+                    db, post_id, "word_frequency"
+                )
             if not text_stats_analysis:
-                text_stats_analysis = await get_latest_post_analysis(db, post_id, "text_stats")
+                text_stats_analysis = await get_latest_post_analysis(
+                    db, post_id, "text_stats"
+                )
             if not tags_analysis:
                 tags_analysis = await get_latest_post_analysis(db, post_id, "tags")
 
@@ -308,7 +324,8 @@ class PostsAnalyzer:
         if word_freq_analysis:
             analysis_data = json.loads(word_freq_analysis.result)
             result.word_frequencies = [
-                WordFrequency(**freq) for freq in analysis_data.get("word_frequencies", [])
+                WordFrequency(**freq)
+                for freq in analysis_data.get("word_frequencies", [])
             ]
 
         if text_stats_analysis:
@@ -317,12 +334,16 @@ class PostsAnalyzer:
 
         if tags_analysis:
             analysis_data = json.loads(tags_analysis.result)
-            result.extracted_tags = ExtractedTags(tags=analysis_data.get("extracted_tags", []))
+            result.extracted_tags = ExtractedTags(
+                tags=analysis_data.get("extracted_tags", [])
+            )
 
         # Include raw analysis data
         result.raw_analysis = {}
         if word_freq_analysis:
-            result.raw_analysis["word_frequency"] = json.loads(word_freq_analysis.result)
+            result.raw_analysis["word_frequency"] = json.loads(
+                word_freq_analysis.result
+            )
         if text_stats_analysis:
             result.raw_analysis["text_stats"] = json.loads(text_stats_analysis.result)
         if tags_analysis:

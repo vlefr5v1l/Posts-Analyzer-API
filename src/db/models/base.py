@@ -19,6 +19,7 @@ metadata = MetaData(naming_convention=convention)
 
 class Base(DeclarativeBase):
     """Base model class for all database models"""
+
     metadata = metadata
 
     # Automatically generate table name based on class name
@@ -34,6 +35,7 @@ class Base(DeclarativeBase):
 
 class TimestampMixin:
     """Mixin to add created_at and updated_at fields to models"""
+
     created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(
         default=datetime.utcnow, onupdate=datetime.utcnow

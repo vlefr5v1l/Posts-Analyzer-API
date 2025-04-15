@@ -8,6 +8,7 @@ from src.db.models.base import Base, TimestampMixin
 
 class Category(Base, TimestampMixin):
     """Category model for post categorization"""
+
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(100), unique=True, index=True)
     description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
@@ -23,8 +24,11 @@ class Category(Base, TimestampMixin):
 
 class Post(Base, TimestampMixin):
     """Post model representing content entries"""
+
     id: Mapped[int] = mapped_column(primary_key=True)
-    category_id: Mapped[int] = mapped_column(ForeignKey("category.id", ondelete="CASCADE"))
+    category_id: Mapped[int] = mapped_column(
+        ForeignKey("category.id", ondelete="CASCADE")
+    )
     content: Mapped[str] = mapped_column(Text)
     title: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     search_vector: Mapped[Optional[TSVECTOR]] = mapped_column(
@@ -44,11 +48,12 @@ class Post(Base, TimestampMixin):
 
 
 # Creating a GIN index for full-text search
-Index('ix_post_search_vector_gin', Post.search_vector, postgresql_using='gin')
+Index("ix_post_search_vector_gin", Post.search_vector, postgresql_using="gin")
 
 
 class PostAnalysis(Base, TimestampMixin):
     """Model for storing post analysis results"""
+
     id: Mapped[int] = mapped_column(primary_key=True)
     post_id: Mapped[int] = mapped_column(ForeignKey("post.id", ondelete="CASCADE"))
     analysis_type: Mapped[str] = mapped_column(String(50))
@@ -68,10 +73,10 @@ def update_post_search_vector(session, post_id):
         Post.__table__.update()
         .where(Post.id == post_id)
         .values(
-            search_vector=func.to_tsvector('russian',
-                                           func.coalesce(Post.title, '') + ' ' +
-                                           func.coalesce(Post.content, '')
-                                           )
+            search_vector=func.to_tsvector(
+                "russian",
+                func.coalesce(Post.title, "") + " " + func.coalesce(Post.content, ""),
+            )
         )
     )
     session.execute(stmt)

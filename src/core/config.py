@@ -1,5 +1,4 @@
-import os
-from typing import Any, Dict, Optional
+from typing import Optional
 
 from pydantic import PostgresDsn, computed_field
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -7,8 +6,9 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     """Application settings"""
+
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=".env.example",
         env_file_encoding="utf-8",
         case_sensitive=True,
     )

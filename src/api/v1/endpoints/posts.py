@@ -12,8 +12,6 @@ from src.db.crud.posts import (
     delete_post,
     get_category_by_name,
     get_filtered_posts,
-    get_post,
-    get_posts_count,
     update_category,
     update_post,
 )
@@ -41,8 +39,8 @@ router = APIRouter()
     status_code=status.HTTP_201_CREATED,
 )
 async def create_category_endpoint(
-        category_in: CategoryCreate,
-        db: AsyncSession = Depends(get_db),
+    category_in: CategoryCreate,
+    db: AsyncSession = Depends(get_db),
 ):
     """Create a new category"""
     # Check if category with same name already exists
@@ -61,7 +59,7 @@ async def create_category_endpoint(
     response_model=CategoryResponse,
 )
 async def get_category_endpoint(
-        category: Category = Depends(get_category_by_id),
+    category: Category = Depends(get_category_by_id),
 ):
     """Get category by ID"""
     return category
@@ -72,9 +70,9 @@ async def get_category_endpoint(
     response_model=CategoryResponse,
 )
 async def update_category_endpoint(
-        category_in: CategoryUpdate,
-        category: Category = Depends(get_category_by_id),
-        db: AsyncSession = Depends(get_db),
+    category_in: CategoryUpdate,
+    category: Category = Depends(get_category_by_id),
+    db: AsyncSession = Depends(get_db),
 ):
     """Update an existing category"""
     # Check if new name conflicts with existing category
@@ -101,8 +99,8 @@ async def update_category_endpoint(
     status_code=status.HTTP_204_NO_CONTENT,
 )
 async def delete_category_endpoint(
-        category: Category = Depends(get_category_by_id),
-        db: AsyncSession = Depends(get_db),
+    category: Category = Depends(get_category_by_id),
+    db: AsyncSession = Depends(get_db),
 ):
     """Delete a category"""
     await delete_category(db, category.id)
@@ -116,12 +114,12 @@ async def delete_category_endpoint(
     status_code=status.HTTP_201_CREATED,
 )
 async def create_post_endpoint(
-        post_in: PostCreate,
-        db: AsyncSession = Depends(get_db),
+    post_in: PostCreate,
+    db: AsyncSession = Depends(get_db),
 ):
     """Create a new post"""
     # Ensure category exists
-    category = await get_category_by_id(post_in.category_id, db)
+    await get_category_by_id(post_in.category_id, db)
 
     return await create_post(db, post_in)
 
@@ -131,7 +129,7 @@ async def create_post_endpoint(
     response_model=PostResponse,
 )
 async def get_post_endpoint(
-        post: Post = Depends(get_post_by_id),
+    post: Post = Depends(get_post_by_id),
 ):
     """Get post by ID"""
     return post
@@ -142,9 +140,9 @@ async def get_post_endpoint(
     response_model=PostResponse,
 )
 async def update_post_endpoint(
-        post_in: PostUpdate,
-        post: Post = Depends(get_post_by_id),
-        db: AsyncSession = Depends(get_db),
+    post_in: PostUpdate,
+    post: Post = Depends(get_post_by_id),
+    db: AsyncSession = Depends(get_db),
 ):
     """Update an existing post"""
     # Check if category exists if category_id is provided
@@ -166,8 +164,8 @@ async def update_post_endpoint(
     status_code=status.HTTP_204_NO_CONTENT,
 )
 async def delete_post_endpoint(
-        post: Post = Depends(get_post_by_id),
-        db: AsyncSession = Depends(get_db),
+    post: Post = Depends(get_post_by_id),
+    db: AsyncSession = Depends(get_db),
 ):
     """Delete a post"""
     await delete_post(db, post.id)
@@ -179,13 +177,13 @@ async def delete_post_endpoint(
     response_model=PaginatedPostsResponse,
 )
 async def get_posts_endpoint(
-        db: AsyncSession = Depends(get_db),
-        limit: int = Query(10, ge=1, le=100),
-        offset: int = Query(0, ge=0),
-        category_id: Optional[int] = None,
-        category_name: Optional[str] = None,
-        search_query: Optional[str] = None,
-        use_fulltext: bool = True,
+    db: AsyncSession = Depends(get_db),
+    limit: int = Query(10, ge=1, le=100),
+    offset: int = Query(0, ge=0),
+    category_id: Optional[int] = None,
+    category_name: Optional[str] = None,
+    search_query: Optional[str] = None,
+    use_fulltext: bool = True,
 ):
     """
     Get filtered and paginated posts
@@ -229,9 +227,9 @@ async def get_posts_endpoint(
     response_model=PostAnalysisResult,
 )
 async def analyze_post_endpoint(
-        post: Post = Depends(get_post_by_id),
-        db: AsyncSession = Depends(get_db),
-        run_if_missing: bool = True,
+    post: Post = Depends(get_post_by_id),
+    db: AsyncSession = Depends(get_db),
+    run_if_missing: bool = True,
 ):
     """
     Analyze post content
@@ -256,10 +254,10 @@ async def analyze_post_endpoint(
     response_model=List[PostAnalysisResult],
 )
 async def analyze_filtered_posts_endpoint(
-        filters: PostFilterParams,
-        db: AsyncSession = Depends(get_db),
-        analysis_types: List[str] = Query(["word_frequency", "text_stats", "tags"]),
-        save_results: bool = True,
+    filters: PostFilterParams,
+    db: AsyncSession = Depends(get_db),
+    analysis_types: List[str] = Query(["word_frequency", "text_stats", "tags"]),
+    save_results: bool = True,
 ):
     """
     Analyze multiple posts based on filter criteria

@@ -39,7 +39,6 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
             await session.close()
 
 
-
 async def init_models():
     """Initialize database models (used during testing)"""
     async with engine.begin() as conn:

@@ -11,15 +11,12 @@ from src.schemas.posts import (
     CategoryCreate,
     CategoryUpdate,
     PostFilterParams,
-    PostAnalysisCreate
+    PostAnalysisCreate,
 )
 
 
 # Category CRUD operations
-async def create_category(
-        db: AsyncSession,
-        category_in: CategoryCreate
-) -> Category:
+async def create_category(db: AsyncSession, category_in: CategoryCreate) -> Category:
     """Create a new category"""
     category = Category(**category_in.model_dump())
     db.add(category)
@@ -28,32 +25,20 @@ async def create_category(
     return category
 
 
-async def get_category(
-        db: AsyncSession,
-        category_id: int
-) -> Optional[Category]:
+async def get_category(db: AsyncSession, category_id: int) -> Optional[Category]:
     """Get category by ID"""
-    result = await db.execute(
-        select(Category).where(Category.id == category_id)
-    )
+    result = await db.execute(select(Category).where(Category.id == category_id))
     return result.scalars().first()
 
 
-async def get_category_by_name(
-        db: AsyncSession,
-        name: str
-) -> Optional[Category]:
+async def get_category_by_name(db: AsyncSession, name: str) -> Optional[Category]:
     """Get category by name"""
-    result = await db.execute(
-        select(Category).where(Category.name == name)
-    )
+    result = await db.execute(select(Category).where(Category.name == name))
     return result.scalars().first()
 
 
 async def update_category(
-        db: AsyncSession,
-        category_id: int,
-        category_in: CategoryUpdate
+    db: AsyncSession, category_id: int, category_in: CategoryUpdate
 ) -> Optional[Category]:
     """Update an existing category"""
     category = await get_category(db, category_id)
@@ -69,10 +54,7 @@ async def update_category(
     return category
 
 
-async def delete_category(
-        db: AsyncSession,
-        category_id: int
-) -> bool:
+async def delete_category(db: AsyncSession, category_id: int) -> bool:
     """Delete a category by ID"""
     category = await get_category(db, category_id)
     if not category:
@@ -84,10 +66,7 @@ async def delete_category(
 
 
 # Post CRUD operations
-async def create_post(
-        db: AsyncSession,
-        post_in: PostCreate
-) -> Post:
+async def create_post(db: AsyncSession, post_in: PostCreate) -> Post:
     """Create a new post"""
     post = Post(**post_in.model_dump())
     db.add(post)
@@ -99,8 +78,7 @@ async def create_post(
         .where(Post.id == post.id)
         .values(
             search_vector=func.to_tsvector(
-                'russian',
-                func.coalesce(post.title, '') + ' ' + post.content
+                "russian", func.coalesce(post.title, "") + " " + post.content
             )
         )
     )
@@ -112,9 +90,7 @@ async def create_post(
 
 
 async def get_post(
-        db: AsyncSession,
-        post_id: int,
-        load_category: bool = True
+    db: AsyncSession, post_id: int, load_category: bool = True
 ) -> Optional[Post]:
     """Get post by ID"""
     query = select(Post).where(Post.id == post_id)
@@ -127,9 +103,7 @@ async def get_post(
 
 
 async def update_post(
-        db: AsyncSession,
-        post_id: int,
-        post_in: PostUpdate
+    db: AsyncSession, post_id: int, post_in: PostUpdate
 ) -> Optional[Post]:
     """Update an existing post"""
     post = await get_post(db, post_id, load_category=False)
@@ -143,14 +117,13 @@ async def update_post(
     await db.flush()
 
     # Update search vector if content or title changed
-    if 'content' in update_data or 'title' in update_data:
+    if "content" in update_data or "title" in update_data:
         stmt = (
             Post.__table__.update()
             .where(Post.id == post.id)
             .values(
                 search_vector=func.to_tsvector(
-                    'russian',
-                    func.coalesce(post.title, '') + ' ' + post.content
+                    "russian", func.coalesce(post.title, "") + " " + post.content
                 )
             )
         )
@@ -161,10 +134,7 @@ async def update_post(
     return post
 
 
-async def delete_post(
-        db: AsyncSession,
-        post_id: int
-) -> bool:
+async def delete_post(db: AsyncSession, post_id: int) -> bool:
     """Delete a post by ID"""
     post = await get_post(db, post_id, load_category=False)
     if not post:
@@ -175,10 +145,7 @@ async def delete_post(
     return True
 
 
-async def get_posts_count(
-        db: AsyncSession,
-        filters: PostFilterParams
-) -> int:
+async def get_posts_count(db: AsyncSession, filters: PostFilterParams) -> int:
     """Get total count of posts with applied filters"""
     # Start with base query
     query = select(func.count(Post.id))
@@ -192,8 +159,7 @@ async def get_posts_count(
 
 
 async def get_filtered_posts(
-        db: AsyncSession,
-        filters: PostFilterParams
+    db: AsyncSession, filters: PostFilterParams
 ) -> Tuple[List[Post], int]:
     """
     Get filtered and paginated posts
@@ -205,10 +171,7 @@ async def get_filtered_posts(
     total = await get_posts_count(db, filters)
 
     # Build main query with joins and filters
-    query = (
-        select(Post)
-        .options(selectinload(Post.category))
-    )
+    query = select(Post).options(selectinload(Post.category))
 
     # Apply filters
     query = _apply_post_filters(query, filters)
@@ -240,15 +203,14 @@ def _apply_post_filters(query: Any, filters: PostFilterParams) -> Any:
     if filters.search_query:
         if filters.use_fulltext:
             # Use PostgreSQL full-text search
-            search_query = func.plainto_tsquery('russian', filters.search_query)
-            filter_conditions.append(Post.search_vector.op('@@')(search_query))
+            search_query = func.plainto_tsquery("russian", filters.search_query)
+            filter_conditions.append(Post.search_vector.op("@@")(search_query))
         else:
             # Use ILIKE for simple text search
             search_pattern = f"%{filters.search_query}%"
             filter_conditions.append(
                 or_(
-                    Post.content.ilike(search_pattern),
-                    Post.title.ilike(search_pattern)
+                    Post.content.ilike(search_pattern), Post.title.ilike(search_pattern)
                 )
             )
 
@@ -261,8 +223,7 @@ def _apply_post_filters(query: Any, filters: PostFilterParams) -> Any:
 
 # Post analysis CRUD operations
 async def create_post_analysis(
-        db: AsyncSession,
-        analysis_in: PostAnalysisCreate
+    db: AsyncSession, analysis_in: PostAnalysisCreate
 ) -> PostAnalysis:
     """Create a new post analysis record"""
     analysis = PostAnalysis(**analysis_in.model_dump())
@@ -273,9 +234,7 @@ async def create_post_analysis(
 
 
 async def get_post_analyses(
-        db: AsyncSession,
-        post_id: int,
-        analysis_type: Optional[str] = None
+    db: AsyncSession, post_id: int, analysis_type: Optional[str] = None
 ) -> List[PostAnalysis]:
     """Get all analyses for a post, optionally filtered by type"""
     query = select(PostAnalysis).where(PostAnalysis.post_id == post_id)
@@ -288,16 +247,13 @@ async def get_post_analyses(
 
 
 async def get_latest_post_analysis(
-        db: AsyncSession,
-        post_id: int,
-        analysis_type: str
+    db: AsyncSession, post_id: int, analysis_type: str
 ) -> Optional[PostAnalysis]:
     """Get the latest analysis of a specific type for a post"""
     query = (
         select(PostAnalysis)
         .where(
-            PostAnalysis.post_id == post_id,
-            PostAnalysis.analysis_type == analysis_type
+            PostAnalysis.post_id == post_id, PostAnalysis.analysis_type == analysis_type
         )
         .order_by(PostAnalysis.created_at.desc())
         .limit(1)

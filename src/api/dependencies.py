@@ -7,8 +7,7 @@ from src.db.models.posts import Category, Post
 
 
 async def get_category_by_id(
-    category_id: int,
-    db: AsyncSession = Depends(get_db)
+    category_id: int, db: AsyncSession = Depends(get_db)
 ) -> Category:
     """
     Dependency to get category by ID or raise 404
@@ -17,15 +16,12 @@ async def get_category_by_id(
     if category is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Category with ID {category_id} not found"
+            detail=f"Category with ID {category_id} not found",
         )
     return category
 
 
-async def get_post_by_id(
-    post_id: int,
-    db: AsyncSession = Depends(get_db)
-) -> Post:
+async def get_post_by_id(post_id: int, db: AsyncSession = Depends(get_db)) -> Post:
     """
     Dependency to get post by ID or raise 404
     """
@@ -33,6 +29,6 @@ async def get_post_by_id(
     if post is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Post with ID {post_id} not found"
+            detail=f"Post with ID {post_id} not found",
         )
     return post
