@@ -10,6 +10,7 @@ from nltk.tokenize import word_tokenize, sent_tokenize
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.config import settings
+from src.core.database import async_session_maker
 from src.core.logger import get_logger
 from src.db.crud.posts import (
     get_filtered_posts,
@@ -74,7 +75,7 @@ class PostsAnalyzer:
             save_results: Whether to save analysis results to database
 
         Returns:
-            Tuple containing list of post analyses and metadata
+            Tuple containing list of post analyzes and metadata
         """
         if not analysis_types:
             analysis_types = ["word_frequency", "text_stats", "tags"]
@@ -83,7 +84,6 @@ class PostsAnalyzer:
         posts, total_count = await get_filtered_posts(db, filters)
 
         # Process posts in batches
-        results = []
         metadata = {
             "total_posts": total_count,
             "processed_posts": len(posts),
@@ -95,7 +95,9 @@ class PostsAnalyzer:
 
         async def process_post(post: Post) -> Dict[str, Any]:
             async with semaphore:
-                return await self._analyze_post(db, post, analysis_types, save_results)
+                # Создаем новую сессию для каждой обработки
+                async with async_session_maker() as session:
+                    return await self._analyze_post(session, post, analysis_types, save_results)
 
         # Process posts concurrently with controlled concurrency
         tasks = [process_post(post) for post in posts]
