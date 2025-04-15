@@ -1,3 +1,4 @@
+import os
 from typing import Optional
 
 from pydantic import PostgresDsn, computed_field
@@ -8,7 +9,7 @@ class Settings(BaseSettings):
     """Application settings"""
 
     model_config = SettingsConfigDict(
-        env_file=".env.example",
+        env_file=os.environ.get("ENV_FILE", ".env.example"),
         env_file_encoding="utf-8",
         case_sensitive=True,
     )
@@ -48,7 +49,6 @@ class Settings(BaseSettings):
     BATCH_SIZE: int = 100
     MAX_WORKERS: int = 4
 
-    # Other settings can be added here
 
 
 settings = Settings()
