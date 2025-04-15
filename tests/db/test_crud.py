@@ -64,9 +64,7 @@ async def test_get_category_by_name(db_session: AsyncSession, categories):
 async def test_update_category(db_session: AsyncSession, categories):
     """Test updating a category"""
     category_id = categories[0].id
-    update_data = CategoryUpdate(
-        name="Updated Category", description="New description"
-    )
+    update_data = CategoryUpdate(name="Updated Category", description="New description")
 
     updated_category = await update_category(db_session, category_id, update_data)
 
@@ -124,9 +122,7 @@ async def test_get_post(db_session: AsyncSession, posts):
 async def test_update_post(db_session: AsyncSession, posts):
     """Test updating a post"""
     post_id = posts[0].id
-    update_data = PostUpdate(
-        title="Updated Title", content="Updated content"
-    )
+    update_data = PostUpdate(title="Updated Title", content="Updated content")
 
     updated_post = await update_post(db_session, post_id, update_data)
 
@@ -151,7 +147,9 @@ async def test_delete_post(db_session: AsyncSession, posts):
 
 # Post filtering tests
 @pytest.mark.asyncio
-async def test_get_filtered_posts_by_category(db_session: AsyncSession, categories, posts):
+async def test_get_filtered_posts_by_category(
+    db_session: AsyncSession, categories, posts
+):
     """Test filtering posts by category"""
     filter_params = PostFilterParams(category_id=categories[1].id)
     filtered_posts, count = await get_filtered_posts(db_session, filter_params)
@@ -247,7 +245,9 @@ async def test_post_analysis_operations(db_session: AsyncSession, posts):
     assert len(analyses_by_type) > 0
     assert all(a.analysis_type == "word_frequency" for a in analyses_by_type)
 
-    latest_analysis = await get_latest_post_analysis(db_session, post_id, "word_frequency")
+    latest_analysis = await get_latest_post_analysis(
+        db_session, post_id, "word_frequency"
+    )
     assert latest_analysis is not None
     assert latest_analysis.post_id == post_id
     assert latest_analysis.analysis_type == "word_frequency"

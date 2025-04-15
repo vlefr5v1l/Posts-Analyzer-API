@@ -15,6 +15,7 @@ def override_get_db(db_session: AsyncSession) -> Callable:
     """
     Returns a function to override the original get_db dependency
     """
+
     async def _override_get_db():
         yield db_session
 

@@ -58,7 +58,9 @@ async def test_update_post(app_client: AsyncClient, posts):
     assert data["id"] == post_id
     assert data["title"] == update_data["title"]
     assert data["content"] == update_data["content"]
-    assert data["category_id"] == posts[1].category_id  # Category should remain unchanged
+    assert (
+        data["category_id"] == posts[1].category_id
+    )  # Category should remain unchanged
 
 
 @pytest.mark.asyncio
@@ -77,7 +79,9 @@ async def test_delete_post(app_client: AsyncClient, posts):
 
 
 @pytest.mark.asyncio
-async def test_get_filtered_posts_by_category(app_client: AsyncClient, categories, posts):
+async def test_get_filtered_posts_by_category(
+    app_client: AsyncClient, categories, posts
+):
     """Test filtering posts by category via API"""
     category_id = categories[1].id
 

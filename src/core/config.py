@@ -50,5 +50,4 @@ class Settings(BaseSettings):
     MAX_WORKERS: int = 4
 
 
-
 settings = Settings()

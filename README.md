@@ -32,6 +32,13 @@ posts-analyzer/
 ├── requirements.txt          # Зависимости
 ├── alembic.ini               # Конфигурация Alembic
 │
+├── tests/                    # Тесты
+│   ├── conftest.py           # Фикстуры для тестов
+│   ├── .env.test             # Тестовые переменные окружения
+│   ├── db/                   # Тесты для моделей и CRUD
+│   ├── services/             # Тесты для сервисов
+│   └── api/                  # Тесты API-эндпоинтов
+│
 └── src/                      # Исходный код
     ├── alembic/              # Миграции базы данных
     ├── api/                  # API эндпоинты
@@ -48,7 +55,7 @@ posts-analyzer/
 
 1. Клонировать репозиторий:
    ```bash
-   git clone <repository-url>
+   git clone git@github.com:vlefr5v1l/Posts-Analyzer-API.git
    cd posts-analyzer
    ```
 
@@ -81,7 +88,7 @@ posts-analyzer/
 
 1. Клонировать репозиторий:
    ```bash
-   git clone <repository-url>
+   git clone git@github.com:vlefr5v1l/Posts-Analyzer-API.git
    cd posts-analyzer
    ```
 
@@ -118,4 +125,36 @@ posts-analyzer/
 
 После запуска API доступна документация Swagger:
 - `http://localhost:8000/api/docs`
-- `http://localhost:8000/api/redoc`
+
+## Тестирование
+
+Проект включает комплексный набор автоматических тестов, использующих pytest и PostgreSQL. Общее покрытие кода тестами - **92%**.
+
+### Покрытие тестами по компонентам
+
+| Компонент | Покрытие |
+|-----------|----------|
+| Модели данных (models) | 94-85% |
+| CRUD-операции | 97% |
+| Схемы данных | 100% |
+| API-эндпоинты | 62-100% |
+| Сервис анализа текста | 94% |
+| Ядро приложения | 96% |
+
+### Типы тестов
+
+Проект содержит следующие категории тестов:
+
+1. **Модульные тесты** - проверка отдельных компонентов системы:
+   - Модели данных (`tests/db/test_models.py`)
+   - CRUD-операции (`tests/db/test_crud.py`)
+   - Сервис анализа текста (`tests/services/test_post_analyzer.py`)
+
+2. **Интеграционные тесты** - проверка взаимодействия между компонентами:
+   - Тесты API-эндпоинтов категорий (`tests/api/test_categories.py`)
+   - Тесты API-эндпоинтов постов (`tests/api/test_posts.py`)
+   - Тесты API-эндпоинтов анализа (`tests/api/test_posts.py`)
+
+3. **Системные тесты** - проверка работы всего приложения:
+   - Тесты документации API (`tests/api/test_app.py`)
+   - Тесты здоровья приложения (`tests/api/test_app.py`)
