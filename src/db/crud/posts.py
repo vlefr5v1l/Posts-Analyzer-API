@@ -107,7 +107,7 @@ async def create_post(
     await db.execute(stmt)
 
     await db.commit()
-    await db.refresh(post)
+    await db.refresh(post, ["category"])
     return post
 
 
